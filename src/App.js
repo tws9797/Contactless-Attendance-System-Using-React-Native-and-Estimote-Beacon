@@ -1,10 +1,21 @@
 import React, { Component } from 'react';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
 import reducers from './reducers';
 import firebase from 'firebase';
+import ReduxThunk from 'redux-thunk';
+import LoginForm from './components/LoginForm';
 
+const firebaseConfig = {
+  apiKey: "AIzaSyAM3PGH7PlZHD457bNen9XZGckwq4XixGg",
+  authDomain: "test-52b88.firebaseapp.com",
+  databaseURL: "https://test-52b88.firebaseio.com",
+  projectId: "test-52b88",
+  storageBucket: "test-52b88.appspot.com",
+  messagingSenderId: "131743538517",
+  appId: "1:131743538517:web:ff704207f140a5a4"
+};
 
 class App extends Component {
 
@@ -14,11 +25,9 @@ class App extends Component {
 
   render(){
     return (
-      <Provider store={createStore(reducers)}>
-        <View>
-          <Text>
-            Hello!
-          </Text>
+      <Provider store={createStore(reducers, {}, applyMiddleware(ReduxThunk))}>
+        <View style={{ flex:1, flexDirection: 'row', alignItems: 'center'}}>
+          <LoginForm />
         </View>
       </Provider>
     );
