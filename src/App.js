@@ -3,31 +3,20 @@ import { View } from 'react-native';
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
 import reducers from './reducers';
-import firebase from 'firebase';
 import ReduxThunk from 'redux-thunk';
 import LoginForm from './components/LoginForm';
+import { createAppContainer } from 'react-navigation';
+import { AppNavigator } from './Navigator';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAM3PGH7PlZHD457bNen9XZGckwq4XixGg",
-  authDomain: "test-52b88.firebaseapp.com",
-  databaseURL: "https://test-52b88.firebaseio.com",
-  projectId: "test-52b88",
-  storageBucket: "test-52b88.appspot.com",
-  messagingSenderId: "131743538517",
-  appId: "1:131743538517:web:ff704207f140a5a4"
-};
+const Navigator = createAppContainer(AppNavigator);
 
 class App extends Component {
-
-  componentWillMount(){
-    firebase.initializeApp(firebaseConfig);
-  }
 
   render(){
     return (
       <Provider store={createStore(reducers, {}, applyMiddleware(ReduxThunk))}>
-        <View style={{ flex:1, flexDirection: 'row', alignItems: 'center'}}>
-          <LoginForm />
+        <View style={{ flex:1 }}>
+          <Navigator />
         </View>
       </Provider>
     );

@@ -3,9 +3,14 @@ import { View, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Card, ListItem, Button, Input } from 'react-native-elements';
 import { connect } from 'react-redux';
-import { emailChanged, passwordChanged, loginUser } from '../actions';
+import { emailChanged, passwordChanged, loginUser, getUserToken } from '../actions';
+import AsyncStorage from '@react-native-community/async-storage';
 
 class LoginForm extends Component {
+
+  static navigationOptions = {
+    header: null
+  }
 
   onEmailChange(text){
     this.props.emailChanged(text);
@@ -16,9 +21,10 @@ class LoginForm extends Component {
   }
 
   onButtonPress(){
-    const { email, password } = this.props;
+    const { email, password, navigation } = this.props;
 
-    this.props.loginUser({ email, password });
+    this.props.loginUser({ email, password, navigation });
+
   }
 
   renderError(){
@@ -34,41 +40,41 @@ class LoginForm extends Component {
 
   render(){
     return (
-      <View style={{ flex: 1}}>
-      <Card title='Utar Attendance'>
+      <View style={{justifyContent: 'center', flex: 1}}>
+        <Card title='Utar Attendance'>
 
-        <Input
-          placeholder='EMAIL'
-          leftIcon={{ type: 'font-awesome', name: 'user' }}
-          leftIconContainerStyle={{ marginRight: 10}}
-          containerStyle={{ marginBottom: 10 }}
-          onChangeText={this.onEmailChange.bind(this)}
-          value={this.props.email}
-        />
+          <Input
+            placeholder='EMAIL'
+            leftIcon={{ type: 'font-awesome', name: 'user' }}
+            leftIconContainerStyle={{ marginRight: 10}}
+            containerStyle={{ marginBottom: 10 }}
+            onChangeText={this.onEmailChange.bind(this)}
+            value="test@test.com"
+          />
 
-        <Input
-          placeholder='PASSWORD'
-          leftIcon={{ type: 'font-awesome', name: 'lock' }}
-          leftIconContainerStyle={{ marginRight: 10}}
-          containerStyle={{ marginBottom: 10 }}
-          secureTextEntry= {true}
-          onChangeText={this.onPasswordChange.bind(this)}
-          value={this.props.password}
-        />
+          <Input
+            placeholder='PASSWORD'
+            leftIcon={{ type: 'font-awesome', name: 'lock' }}
+            leftIconContainerStyle={{ marginRight: 10}}
+            containerStyle={{ marginBottom: 10 }}
+            secureTextEntry= {true}
+            onChangeText={this.onPasswordChange.bind(this)}
+            value="password"
+          />
 
-        <View>
-          {this.renderError()}
-        </View>
+          <View>
+            {this.renderError()}
+          </View>
 
-        <Button
-          onPress={this.onButtonPress.bind(this)}
-          backgroundColor='#03A9F4'
-          buttonStyle={{borderRadius: 0, marginTop: 10, marginLeft: 0, marginRight: 0, marginBottom: 0}}
-          title='LOGIN'
-          loading={this.props.loading}
-        />
+          <Button
+            onPress={this.onButtonPress.bind(this)}
+            backgroundColor='#03A9F4'
+            buttonStyle={{borderRadius: 0, marginTop: 10, marginLeft: 0, marginRight: 0, marginBottom: 0}}
+            title='LOGIN'
+            loading={this.props.loading}
+          />
 
-      </Card>
+        </Card>
       </View>
     );
   }
@@ -85,7 +91,7 @@ const mapStateToProps = ({ auth }) => {
 //Connect the reducer with this component
 export default connect(mapStateToProps, {
   //The function from actions that we want to use
-  emailChanged, passwordChanged, loginUser
+  emailChanged, passwordChanged, loginUser, getUserToken
 })(LoginForm);
 
 //User types something
