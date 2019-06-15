@@ -39,6 +39,9 @@ class LoginForm extends Component {
 
 
   render(){
+    
+    console.log(this.props);
+
     return (
       <View style={{justifyContent: 'center', flex: 1}}>
         <Card title='Utar Attendance'>

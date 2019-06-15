@@ -4,7 +4,7 @@ import {
   LOGIN_USER_SUCCESS,
   LOGIN_USER_FAIL,
   LOGIN_USER,
-  GET_TOKEN
+  GET_USER
 } from './types.js';
 import Firebase from '../Firebase';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -20,13 +20,6 @@ export const passwordChanged = (text) => {
   return {
     type: PASSWORD_CHANGED,
     payload: text
-  };
-};
-
-export const getToken = (token) => {
-  return {
-    type: GET_TOKEN,
-    payload: token
   };
 };
 
@@ -48,13 +41,21 @@ export const loginUser = ({ email, password, navigation }) => {
   };
 };
 
-export const getUserToken = () => {
+export const getUserToken = (navigation) => {
   return (dispatch) =>
-    AsyncStorage.getItem('userToken')
-      .then((token) => {
-        dispatch(getToken(token));
-      })
-      .catch(() => loginUserFail(dispatch))
+    Firebase.auth().onAuthStateChanged((user) => {
+      console.log(user);
+      if(user){
+        dispatch({
+          type: GET_USER,
+          payload: user
+        });
+        navigation.navigate('App');
+      }
+      else{
+        navigation.navigate('Auth');
+      }
+    });
 }
 
 const loginUserFail = (dispatch) => {

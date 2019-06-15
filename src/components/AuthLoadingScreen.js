@@ -20,10 +20,7 @@ class AuthLoadingScreen extends Component {
   }
 
   _bootstrapAsync = () => {
-    this.props.getUserToken().then(() => {
-      this.props.navigation.navigate(this.props.token !== null ? 'App' : 'Auth');
-    })
-    .catch(error => console.log(error));
+    this.props.getUserToken(this.props.navigation);
   }
 
   render() {
