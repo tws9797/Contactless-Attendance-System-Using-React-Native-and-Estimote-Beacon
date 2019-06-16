@@ -7,7 +7,6 @@ import {
   GET_USER
 } from './types.js';
 import Firebase from '../Firebase';
-import AsyncStorage from '@react-native-community/async-storage';
 
 export const emailChanged = (text) => {
   return {
@@ -32,30 +31,29 @@ export const loginUser = ({ email, password, navigation }) => {
     dispatch({ type: LOGIN_USER });
 
     Firebase.auth().signInWithEmailAndPassword(email, password)
-      .then(user => loginUserSuccess(dispatch, user, navigation))
-      .catch(() => {
-        Firebase.auth().createUserWithEmailAndPassword(email, password)
-          .then(user => loginUserSuccess(dispatch, user, navigation))
-          .catch(() => loginUserFail(dispatch));
-      });
+      .then(user => checkUserDeviceId(dispatch, user, navigation))
+      .catch(() => loginUserFail(dispatch));
   };
 };
 
 export const getUserToken = (navigation) => {
   return (dispatch) =>
     Firebase.auth().onAuthStateChanged((user) => {
-      console.log(user);
       if(user){
-        dispatch({
-          type: GET_USER,
-          payload: user
-        });
-        navigation.navigate('App');
+        checkUserDeviceId(dispatch, user, navigation);
       }
       else{
         navigation.navigate('Auth');
       }
     });
+}
+
+const loginUserSuccess = (dispatch, user, navigation) => {
+  dispatch({
+      type: LOGIN_USER_SUCCESS,
+      payload: user
+  });
+  navigation.navigate('App');
 }
 
 const loginUserFail = (dispatch) => {
@@ -64,11 +62,14 @@ const loginUserFail = (dispatch) => {
   });
 }
 
-const loginUserSuccess = (dispatch, user, navigation) => {
-  AsyncStorage.setItem('userToken', JSON.stringify(user))
-    .then(() => dispatch({
-        type: LOGIN_USER_SUCCESS,
-        payload: user
-    }));
-  navigation.navigate('App');
-};
+const checkUserDeviceId = (dispatch, user, navigation) => {
+  return(dispatch) => {
+    Firebase.database().ref(`users/${user.uid}/deviceId`)
+    .on('value', snapshot => {
+      if(snapshot.val() === DeviceInfo.getUniqueID())
+        loginUserSuccess(dispatch, user, navigation);
+      else
+        loginUserFail(dispatch);
+    });
+  };
+}

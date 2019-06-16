@@ -4,7 +4,6 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { Card, ListItem, Button, Input } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { emailChanged, passwordChanged, loginUser, getUserToken } from '../actions';
-import AsyncStorage from '@react-native-community/async-storage';
 
 class LoginForm extends Component {
 
@@ -39,8 +38,6 @@ class LoginForm extends Component {
 
 
   render(){
-    
-    console.log(this.props);
 
     return (
       <View style={{justifyContent: 'center', flex: 1}}>
@@ -52,7 +49,7 @@ class LoginForm extends Component {
             leftIconContainerStyle={{ marginRight: 10}}
             containerStyle={{ marginBottom: 10 }}
             onChangeText={this.onEmailChange.bind(this)}
-            value="test@test.com"
+            value="tws@test.com"
           />
 
           <Input
@@ -86,9 +83,9 @@ class LoginForm extends Component {
 //Get the new state from the AuthReducer as props to this component
 const mapStateToProps = ({ auth }) => {
 
-  const { email, password, error, loading } = auth;
+  const { email, password, error, loading, user } = auth;
 
-  return { email, password, error, loading };
+  return { email, password, error, loading, user };
 };
 
 //Connect the reducer with this component

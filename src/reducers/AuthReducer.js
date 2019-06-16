@@ -3,12 +3,11 @@ import {
   PASSWORD_CHANGED,
   LOGIN_USER_SUCCESS,
   LOGIN_USER_FAIL,
-  LOGIN_USER,
-  GET_USER
+  LOGIN_USER
  } from '../actions/types';
 
 const INITIAL_STATE = {
-  email: 'test@test.com',
+  email: 'tws@test.com',
   password: 'password',
   user: null,
   error: ' ', //To create an invisible row
@@ -24,13 +23,11 @@ export default (state = INITIAL_STATE, action) => {
     case PASSWORD_CHANGED:
       return { ...state, password: action.payload };
     case LOGIN_USER_SUCCESS:
-      return { ...state, ...INITIAL_STATE, user: action.payload };
+      return { ...state, ...INITIAL_STATE, user: action.payload, loading: false };
     case LOGIN_USER_FAIL:
       return { ...state, error: 'Authentication Failed.', loading: false };
     case LOGIN_USER:
       return { ...state, loading: true, error: ' ' };
-    case GET_USER:
-      return { ...state, user: action.payload }
     default:
       return state;
   }

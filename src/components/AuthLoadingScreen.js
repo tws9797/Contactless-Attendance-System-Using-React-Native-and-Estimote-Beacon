@@ -7,7 +7,6 @@ import {
  } from 'react-native';
 import { connect } from 'react-redux';
 import { getUserToken } from '../actions';
-import AsyncStorage from '@react-native-community/async-storage';
 
 class AuthLoadingScreen extends Component {
 
