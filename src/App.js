@@ -14,6 +14,10 @@ class App extends Component {
 
   render(){
     return (
+      //Redux (Predictable state container for JavaScript apps)
+      //Create store that handles interaction between reducers and actions
+      //Redux Thunk is to handle asynchronous request in application
+      //Navigator handles navigation between components
       <Provider store={createStore(reducers, {}, applyMiddleware(ReduxThunk))}>
         <View style={{ flex:1 }}>
           <Navigator />
@@ -26,12 +30,8 @@ class App extends Component {
 export default App;
 
 /**
-Redux is a predictable state container for JavaScript apps.
 The function of Redux is to organizing application states.
 The major components for Redux: reducers, actions, action creators and store.
-Reducer:
-Function that takes the previous state and an action as arguments and returns a new state.
-Reducers specify how the application's state chages in response to actions that are dispatched to the store.
 Actions:
 Actions are plain JavaScript objects that represent payloads of information that send data from your application to your store.
 Actions have a type and an optional payload.
@@ -40,12 +40,8 @@ Actions are often dispatched using an action creator.
 Action Creators:
 Function that returns an action object.
 The action object returned from an action creator is sent to all of the different reducers in the app.
-combineReducers:
-Function that calls all reducers with the slice of state selected according to their key.
-Combines the results into a single object once again.
 Store:
 There is only a single store in a Redux application.
-Store refers to the object that brings actions and reducers together.
 Allow access to state via getState().
 Allow state to be updated via dispatch(action).
 Holds the whole application state.
