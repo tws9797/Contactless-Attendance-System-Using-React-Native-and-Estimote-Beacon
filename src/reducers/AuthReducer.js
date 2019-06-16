@@ -3,7 +3,8 @@ import {
   PASSWORD_CHANGED,
   LOGIN_USER_SUCCESS,
   LOGIN_USER_FAIL,
-  LOGIN_USER
+  LOGIN_USER,
+  GET_USER_ID
  } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -12,6 +13,7 @@ const INITIAL_STATE = {
   user: null,
   error: ' ', //To create an invisible row
   loading: false,
+  status: false
  };
 
 export default (state = INITIAL_STATE, action) => {
@@ -28,6 +30,8 @@ export default (state = INITIAL_STATE, action) => {
       return { ...state, error: 'Authentication Failed.', loading: false };
     case LOGIN_USER:
       return { ...state, loading: true, error: ' ' };
+    case GET_USER_ID:
+      return { ...state, loading: false, status: true};
     default:
       return state;
   }

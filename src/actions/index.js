@@ -4,9 +4,10 @@ import {
   LOGIN_USER_SUCCESS,
   LOGIN_USER_FAIL,
   LOGIN_USER,
-  GET_USER
+  GET_USER_ID
 } from './types.js';
 import Firebase from '../Firebase';
+import DeviceInfo from 'react-native-device-info';
 
 export const emailChanged = (text) => {
   return {
@@ -37,7 +38,7 @@ export const loginUser = ({ email, password, navigation }) => {
 };
 
 export const getUserToken = (navigation) => {
-  return (dispatch) =>
+  return (dispatch) =>{
     Firebase.auth().onAuthStateChanged((user) => {
       if(user){
         checkUserDeviceId(dispatch, user, navigation);
@@ -46,7 +47,9 @@ export const getUserToken = (navigation) => {
         navigation.navigate('Auth');
       }
     });
+  }
 }
+
 
 const loginUserSuccess = (dispatch, user, navigation) => {
   dispatch({
@@ -63,13 +66,17 @@ const loginUserFail = (dispatch) => {
 }
 
 const checkUserDeviceId = (dispatch, user, navigation) => {
-  return(dispatch) => {
-    Firebase.database().ref(`users/${user.uid}/deviceId`)
-    .on('value', snapshot => {
-      if(snapshot.val() === DeviceInfo.getUniqueID())
-        loginUserSuccess(dispatch, user, navigation);
-      else
+  dispatch({
+    type: LOGIN_USER
+  });
+  Firebase.database().ref(`users/${user.uid}/deviceId`)
+  .on('value', snapshot => {
+    if(snapshot.val() === DeviceInfo.getUniqueID())
+      loginUserSuccess(dispatch, user, navigation);
+    else{
+        Firebase.auth().signOut().then(() => {
         loginUserFail(dispatch);
-    });
-  };
+      });
+    }
+  });
 }
