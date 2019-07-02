@@ -9,7 +9,7 @@ import {
 
 //Default state when user uninstall application or clear data
 const INITIAL_STATE = {
-  email: 'tws@test.com',
+  email: '',
   password: 'password',
   user: null,
   error: ' ', //To create an invisible row

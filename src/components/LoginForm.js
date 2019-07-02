@@ -49,7 +49,7 @@ class LoginForm extends Component {
             leftIconContainerStyle={{ marginRight: 10}}
             containerStyle={{ marginBottom: 10 }}
             onChangeText={this.onEmailChange.bind(this)}
-            value="tws@test.com"
+            value={this.props.email}
           />
 
           <Input
