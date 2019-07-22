@@ -10,7 +10,7 @@ import {
 //Default state when user uninstall application or clear data
 const INITIAL_STATE = {
   email: '',
-  password: 'password',
+  password: '',
   user: null,
   error: ' ', //To create an invisible row
   loading: false,
@@ -30,7 +30,7 @@ export default (state = INITIAL_STATE, action) => {
     case LOGIN_USER_SUCCESS:
       return { ...state, ...INITIAL_STATE, user: action.payload, loading: false };
     case LOGIN_USER_FAIL:
-      return { ...state, error: 'Authentication Failed.', loading: false };
+      return { ...state, error: 'Authentication Failed', loading: false };
     case LOGIN_USER:
       return { ...state, loading: true, error: ' ' };
     case GET_USER_ID:

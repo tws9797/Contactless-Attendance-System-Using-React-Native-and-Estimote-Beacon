@@ -35,7 +35,7 @@ export const loginUser = ({ email, password, navigation }) => {
 
     //Sign the user with the email and password provided
     Firebase.auth().signInWithEmailAndPassword(email, password)
-      .then(user => loginUserSuccess(dispatch, user, navigation))
+      .then(user => checkUserDeviceId(dispatch, user, navigation))
       .catch(() => loginUserFail(dispatch));
   };
 };
@@ -48,7 +48,7 @@ export const getUserToken = (navigation) => {
       //If user is logged in
       //compare the deviceId of the user in Firebase with the deviceId of the currently used device
       if(user){
-        loginUserSuccess(dispatch, user, navigation);
+        checkUserDeviceId(dispatch, user, navigation);
       }
       //If user is not logged in
       //Navigate to the auth screen
@@ -77,15 +77,19 @@ const loginUserFail = (dispatch) => {
 
 const checkUserDeviceId = (dispatch, user, navigation) => {
   //Get deviceId that have been previously set
-  Firebase.database().ref(`users/${user.uid}/deviceId`)
+  Firebase.database().ref(`users/${user.uid}/deviceID`)
   .on('value', snapshot => {
-    if(snapshot.val() === DeviceInfo.getUniqueID())
-      loginUserSuccess(dispatch, user, navigation);
-    else{
-        //Sign out to triggered onAuthStateChanged so that user === null
-        Firebase.auth().signOut().then(() => {
-        loginUserFail(dispatch);
-      });
+    if(snapshot.exists()){
+      if(snapshot.val() === DeviceInfo.getUniqueID()){
+        loginUserSuccess(dispatch, user, navigation);
+      }
+      else{
+          //Sign out to triggered onAuthStateChanged so that user === null
+          Firebase.auth().signOut().then(() => {
+            loginUserFail(dispatch);
+          });
+      }
     }
   });
+
 }

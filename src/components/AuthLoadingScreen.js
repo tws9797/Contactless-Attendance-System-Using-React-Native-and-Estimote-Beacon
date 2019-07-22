@@ -6,6 +6,7 @@ import {
     View,
  } from 'react-native';
 import { connect } from 'react-redux';
+import Spinner from 'react-native-spinkit';
 import { getUserToken } from '../actions';
 
 class AuthLoadingScreen extends Component {
@@ -25,7 +26,11 @@ class AuthLoadingScreen extends Component {
   render() {
       return (
           <View style={styles.container}>
-              <ActivityIndicator />
+              <Spinner
+                type = 'Circle'
+                size = {60}
+                color = '#007AFF'
+              />
               <StatusBar barStyle="default" />
           </View>
       );
