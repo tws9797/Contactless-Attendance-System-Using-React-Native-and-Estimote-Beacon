@@ -1,13 +1,13 @@
 import firebase from 'firebase';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAM3PGH7PlZHD457bNen9XZGckwq4XixGg",
-  authDomain: "test-52b88.firebaseapp.com",
-  databaseURL: "https://test-52b88.firebaseio.com",
-  projectId: "test-52b88",
-  storageBucket: "test-52b88.appspot.com",
-  messagingSenderId: "131743538517",
-  appId: "1:131743538517:web:ff704207f140a5a4"
+  apiKey: "AIzaSyCyaliBdovUQCOXVcNaG1QOzRWFc12XOoU",
+  authDomain: "attendance-cbddc.firebaseapp.com",
+  databaseURL: "https://attendance-cbddc.firebaseio.com",
+  projectId: "attendance-cbddc",
+  storageBucket: "",
+  messagingSenderId: "139915211560",
+  appId: "1:139915211560:web:427423d6d50b0a71"
 };
 
 const Firebase = firebase.initializeApp(firebaseConfig);

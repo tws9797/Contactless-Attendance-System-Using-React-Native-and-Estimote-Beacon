@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux';
 import AuthReducer from './AuthReducer';
 import AttendanceReducer from './AttendanceReducer';
+import RecordReducer from './RecordReducer';
 
 
 //combineReducers:
@@ -8,5 +9,6 @@ import AttendanceReducer from './AttendanceReducer';
 //Combines the results into a single object once again.
 export default combineReducers({
   auth: AuthReducer,
-  att: AttendanceReducer
+  att: AttendanceReducer,
+  record: RecordReducer
 });

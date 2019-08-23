@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { View, Text, Alert, Clipboard } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { View, Text, Alert, Clipboard, StyleSheet } from 'react-native';
 import { Card, ListItem, Button, Input, Image } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { emailChanged, passwordChanged, loginUser } from '../actions';
 import DeviceInfo from 'react-native-device-info';
+import { Error, Picture, Container, ButtonStyle } from '../styles';
 
 class LoginForm extends Component {
 
@@ -20,14 +20,17 @@ class LoginForm extends Component {
     };
   }
 
+  //Handle email input
   onEmailChange(text){
     this.props.emailChanged(text);
   }
 
+  //Handle password input
   onPasswordChange(text){
     this.props.passwordChanged(text);
   }
 
+  //Handle login press
   onLoginPress(){
     const { email, password, navigation } = this.props;
 
@@ -35,22 +38,24 @@ class LoginForm extends Component {
 
   }
 
+  //Render error
   renderError(){
     if (this.props.error) {
       return (
-          <Text style={{ fontSize: 20, alignSelf: 'center', color: 'red', marginBottom: 10 }}>
+          <Text style={styles.error}>
             {this.props.error}
           </Text>
       )
     }
   }
 
+  //Copy the device ID to clipboard
   writeToClipboard = async () => {
     await Clipboard.setString(DeviceInfo.getUniqueID());
     alert('Copied to Clipboard!');
   };
 
-
+  //Provide user device ID
   alertDeviceInfo(){
     Alert.alert(
       'Your Device ID',
@@ -74,13 +79,15 @@ class LoginForm extends Component {
 
     return (
 
-      <View style={{justifyContent: 'center', flex: 1, backgroundColor: '#f0f8ff'}}>
+      <View style={styles.loginScreenContainer}>
+
         <Image
           source={require('../images/logo2.png')}
-          style = {{ alignSelf: 'center', width: 200, height: 130, marginBottom: -30 }}
+          style = {styles.logoImage}
         />
+
         <Card
-          containerStyle={{ backgroundColor: '#FF000000', borderWidth: 0, alignSelf: 'center', borderRadius: 50, padding: 20, width: '80%', shadowOpacity: 0, elevation: 0 }}
+          containerStyle={styles.loginFormContainer}
         >
           <Input
             onFocus={this.handleFocusEmail}
@@ -90,8 +97,9 @@ class LoginForm extends Component {
             leftIcon={{ type: 'antdesign', name: 'user', color: this.state.isEmailFocused ? '#007AFF' : '#CCE4FF' }}
             leftIconContainerStyle={{ marginRight: 10, marginLeft: 5}}
             inputContainerStyle={{ borderBottomWidth: 0 }}
-            containerStyle={{ marginBottom: 10, borderWidth: 1, borderRadius: 20, borderColor: this.state.isEmailFocused ? '#007AFF' : '#CCE4FF' }}
+            containerStyle={[styles.inputContainer, {borderColor: this.state.isEmailFocused ? '#007AFF' : '#CCE4FF'}]}
             onChangeText={this.onEmailChange.bind(this)}
+            editable={!this.props.loading}
             value={this.props.email}
           />
 
@@ -103,9 +111,10 @@ class LoginForm extends Component {
             leftIcon={{ type: 'antdesign', name: 'lock', color: this.state.isPasswordFocused ? '#007AFF' : '#CCE4FF' }}
             leftIconContainerStyle={{ marginRight: 10, marginLeft: 5}}
             inputContainerStyle={{ borderBottomWidth: 0 }}
-            containerStyle={{ marginBottom: 10, borderWidth: 1, borderRadius: 20, borderColor: this.state.isPasswordFocused ? '#007AFF' : '#CCE4FF' }}
-            secureTextEntry= {true}
+            containerStyle={[styles.inputContainer, {borderColor: this.state.isPasswordFocused ? '#007AFF' : '#CCE4FF'}]}
+            secureTextEntry= {false}
             onChangeText={this.onPasswordChange.bind(this)}
+            editable={!this.props.loading}
             value={this.props.password}
           />
 
@@ -115,14 +124,15 @@ class LoginForm extends Component {
 
           <Button
             onPress={this.onLoginPress.bind(this)}
-            buttonStyle={{ backgroundColor:'#007AFF', alignSelf: 'center', width: '80%', height: 50, borderRadius: 20, marginLeft: 0, marginRight: 0 }}
+            buttonStyle={styles.loginButton}
             title='LOGIN'
+            disabled={this.props.loading}
+            disabledStyle={styles.loginButton}
             loading={this.props.loading}
           />
-
         </Card>
 
-        <View style={{ justifyContent: 'center', alignItems: 'center', fontFamily: 'Roboto' }}>
+        <View style={styles.deviceIDContainer}>
           <Text onPress={()=> this.alertDeviceInfo()}>Need Your Device ID?</Text>
         </View>
 
@@ -130,6 +140,30 @@ class LoginForm extends Component {
     );
   }
 }
+
+const styles = StyleSheet.create({
+  error: {
+    ...Error.text
+  },
+  logoImage: {
+    ...Picture.logoImage
+  },
+  loginScreenContainer: {
+    ...Container.loginScreenContainer
+  },
+  loginFormContainer: {
+    ...Container.loginFormContainer
+  },
+  inputContainer: {
+    ...Container.inputContainer
+  },
+  deviceIDContainer: {
+    ...Container.deviceIDContainer
+  },
+  loginButton: {
+    ...ButtonStyle.loginButton
+  }
+});
 
 //Get the new state from the AuthReducer as props to this component
 const mapStateToProps = ({ auth }) => {

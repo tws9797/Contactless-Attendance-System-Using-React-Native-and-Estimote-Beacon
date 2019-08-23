@@ -1,80 +1,129 @@
 import React, { Component } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
-import { Card, ListItem, Button, Input } from 'react-native-elements';
-import { getUserInfo, getNextClass, startProximityObserver, toggleModal, dismissModal, stopProximityObserver, checkCurrentLocation } from '../actions';
+import { RefreshControl, View, Text, ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
+import { Card, ListItem, Button, Input, Image, Divider  } from 'react-native-elements';
+import { getUserInfo, getNextClass, getAttTime, dismissAttendanceModal, checkCurrentLocation, dismissBluetoothModal, toggleBluetoothModal } from '../actions';
 import { connect } from 'react-redux';
-import firebase from 'firebase';
 import moment from 'moment';
-import DeviceInfo from 'react-native-device-info';
 import Modal from 'react-native-modal';
-import * as RNEP from "@estimote/react-native-proximity";
-import BackgroundTimer from '../BackgroundTimer';
 import { BluetoothStatus } from 'react-native-bluetooth-status';
+import LinearGradient from 'react-native-linear-gradient';
+import * as Progress from 'react-native-progress';
+import { Container, Indicator, Font, Picture, ButtonStyle } from '../styles';
 
 class HomeScreen extends Component {
 
+  //Hide the header
   static navigationOptions = {
     header: null
   }
 
+  //Get user and class info when opening the app
   componentDidMount(){
+    this.props.getUserInfo();
     this.props.getNextClass();
   }
 
-
-  enableModal(){
-    this.setState({modalVisible: true});
+  //Refresh the application
+  refresh(){
+    this.props.getNextClass();
   }
 
-  startProximityObserver(){
-    let hours = this.props.endTime - this.props.startTime;
-    let criteria = hours * 6;
-    this.props.startProximityObserver(this.props.room, criteria);
-  }
-
+  //Get the bluetooth state
   async getBluetoothState() {
     const isEnabled = await BluetoothStatus.state();
     if(isEnabled){
-      this.startProximityObserver();
+      let hours = this.props.endTime - this.props.startTime;
+      let criteria = hours * 60 * 60 * 0.5;
+      this.props.getAttTime(this.props.room, this.props.courseCode, criteria, this.props.endTime);
     }
     else {
-      this.setModalVisible(true);
+      this.props.toggleBluetoothModal();
     }
-
   }
 
-  renderStatus(){
+  //Dismiss the Bluetooth modal
+  dismissBluetoothModal(){
+    this.props.dismissBluetoothModal();
+  }
+
+  //Dismiss the attendance modal
+  dismissAttendanceModal(){
+    this.refresh();
+    this.props.dismissAttendanceModal();
+  }
+
+  //Render whether there is class or not
+  renderAttendanceStatus(){
     if(!this.props.loading){
       if(this.props.status == 1){
-        var time = moment(this.props.startTime, 'hh').format('hh:mm A') + " - " + moment(this.props.endTime, 'hh').format('hh:mm A');
+        var time = moment(this.props.startTime, 'hh').format('HH:mm') + " to " + moment(this.props.endTime, 'hh').format('HH:mm');
 
         textRendered = (
-          <View style={{flex: 1, flexDirection: 'column'}}>
-              <View>
-                <Text style={{ fontSize: 16, color: '#d3d3d3', fontWeight: '100', letterSpacing: 2 }}>Status</Text>
-                <Text style={{fontSize: 20, letterSpacing: 0.5, lineHeight: 26, marginBottom: 10}}>In Class</Text>
-                <Text style={{ fontSize: 16, color: '#d3d3d3', fontWeight: '100', letterSpacing: 2 }}>Room</Text>
-                <Text style={{fontSize: 20, letterSpacing: 0.5, lineHeight: 26, marginBottom: 10}}>{this.props.room}</Text>
-                <Text style={{ fontSize: 16, color: '#d3d3d3', fontWeight: '100', letterSpacing: 2 }}>Class</Text>
-                <Text style={{fontSize: 20, letterSpacing: 0.5, lineHeight: 26, marginBottom: 10}}>{this.props.className}</Text>
-                <Text style={{ fontSize: 16, color: '#d3d3d3', fontWeight: '100', letterSpacing: 2 }}>Duration</Text>
-                <Text style={{fontSize: 20, letterSpacing: 0.5, lineHeight: 26, marginBottom: 10 }}>{time}</Text>
-                <Text style={{ fontSize: 16, color: '#d3d3d3', fontWeight: '100', letterSpacing: 2 }}>Status</Text>
-                <Text style={{fontSize: 20, letterSpacing: 0.5, lineHeight: 26, marginBottom: 20 }}>{this.props.attendanceTaken? 'Completed' : 'Incomplete'}</Text>
+          <View style={{ flexDirection: 'column' }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={styles.smallFont}>
+                Class
+              </Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-start'}}>
+                <Image
+                  source = {require('../images/active.png')} style={styles.startingImage}
+                />
+                <Text style={styles.smallFont}>Starting</Text>
+              </View>
+            </View>
+
+            <Divider style={{marginTop: 5, marginBottom: 5 }}/>
+
+            <View style={{flexDirection: 'column'}}>
+              <View style={[styles.innerClassContainer, {marginTop: 10}]}>
+                <View style={styles.imageContainer}>
+                  <Image containerStyle={{opacity:0.8}} source = {require('../images/school.png')} style={[styles.classImage, { padding: 5}]} />
+                </View>
+                <View style={styles.classInfoContainer}>
+                  <Text style={styles.smallFont}>Room</Text>
+                  <Text style={styles.bigFont}>{this.props.room}</Text>
+                </View>
+              </View>
+
+              <View style={styles.innerClassContainer}>
+                <View style={styles.imageContainer}>
+                  <Image containerStyle={{opacity:0.8}} source = {require('../images/class1.png')} style={styles.classImage} />
+                </View>
+                <View style={styles.classInfoContainer}>
+                  <Text numberOfLines={1} style={[styles.smallFont, {textTransform: 'capitalize'}]}>{this.props.className}</Text>
+                  <Text style={styles.bigFont}>{this.props.courseCode}</Text>
+                </View>
+              </View>
+
+              <View style={styles.innerClassContainer}>
+                <View style={styles.imageContainer}>
+                  <Image containerStyle={{opacity:0.8}} source = {require('../images/time.png')} style={styles.classImage} />
+                </View>
+                <View style={styles.classInfoContainer}>
+                  <Text style={styles.smallFont}>Duration</Text>
+                  <Text style={styles.bigFont}>{time}</Text>
+                </View>
               </View>
               <Button
                 onPress={this.getBluetoothState.bind(this)}
                 containerStyle={{alignSelf: 'center'}}
-                buttonStyle={{ backgroundColor:'#007AFF', height: 50, width: 180, borderRadius: 20, marginLeft: 0, marginRight: 0 }}
-                title='Take Attendance'
+                titleStyle={{ fontFamily: 'HelveticaNeueMed' }}
+                buttonStyle={styles.attButton}
+                title={this.props.attendanceTaken ? 'Completed' : 'Check In'}
                 disabled={this.props.attendanceTaken}
               />
+            </View>
           </View>
         )
       } else {
         textRendered = (
-          <View style={{flex: 1, flexDirection: 'row'}}>
-              <Text style={{fontSize: 24, letterSpacing: 0.5, lineHeight: 26, marginBottom: 10}}>No Class</Text>
+          <View style={styles.calendarErrorContainer}>
+              <Image
+                source = {require('../images/calendarError.png')} style={styles.calendarErrorImage}
+              />
+              <Text style={styles.noClassFont}>
+                Oops! You have no class currently.
+              </Text>
           </View>
         )
       }
@@ -82,63 +131,115 @@ class HomeScreen extends Component {
       return textRendered;
     }
     else{
-      return <View style = {{ height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center'}}><ActivityIndicator size="small" color="#007AFF" /></View>;
+      return <View style={styles.classIndicator}><ActivityIndicator size="small" color="#007AFF" /></View>;
     }
   }
 
-  refresh(){
-    this.props.getNextClass();
-  }
+  //Toggle attendance modal
+  toggleAttendanceModal(){
+    let hours = this.props.endTime - this.props.startTime;
+    let criteria = hours * 60 * 60 * 0.5;
 
-  state = {
-    modalVisible: false,
-  };
-
-  setModalVisible(visible) {
-    this.setState({modalVisible: visible});
-  }
-
-  renderAttendance(){
+    //Checking the zone
     if(this.props.checking){
-      textRendered = (<Text alignSelf='center'>Please go to {this.props.room}...</Text>)
+      textRendered = (<Text>Please go to {this.props.room}...</Text>)
     } else{
+      //If in the zone
       if(this.props.inClass){
-        textRendered = (<Text alignSelf='center'>Updating attendance...</Text>)
-      } else {
-        textRendered = (<Text alignSelf='center'>You are not in the range...</Text>)
+        textRendered = (<Text>Updating attendance...</Text>)
+      }
+      //If outside the zone
+      else {
+        textRendered = (<Text>You are not in the range...</Text>)
       }
     }
-    return textRendered;
-  }
 
+    if(this.props.attendance){
+      textReturn = (
+        <View style={{alignItems:'center', padding: 30, backgroundColor: '#FFFFFF', borderRadius: 50 }} >
+          <ActivityIndicator size="large" color="#007AFF" style={{ padding: 10 }} />
+          <Text style={{marginBottom: 10}}>{textRendered}</Text>
+          <Progress.Bar progress={this.props.time / criteria} height={10} width={150}  borderRadius={30}/>
+          <Text>{this.props.time} / {criteria}</Text>
+          <Text style={{marginTop: 10}}>{parseInt((this.props.time / criteria) *100)} %</Text>
+        </View>
+      )
+    } else {
+      textReturn = (
+        <View style={{ padding: 0, margin: 0, justifyContent: 'center', alignItems:'center'}}>
+          <Image source = {require('../images/error.png')} style={{ width: 100, height: 100, marginBottom: 10  }} />
+          <Text style={{ marginBottom: 10, textAlign: 'center' }}>Oops. Your attendance is not taken.{'\n'}Please stay in the class longer next time.</Text>
+          <Button
+            onPress={() => this.dismissAttendanceModal()}
+            containerStyle={{alignSelf: 'center'}}
+            buttonStyle={{ backgroundColor:'#007AFF', height: 50, width: 180, borderRadius: 20 }}
+            title='Dismiss'
+          />
+        </View>
+      )
+    }
+
+    return textReturn;
+  }
 
   render() {
     return (
-      <View style={{ flex: 1, backgroundColor: '#f0f8ff', alignItems: 'center' }}>
 
-          <Card containerStyle={{ width: '100%', margin: 0,  borderWidth: 0, elevation: 0, backgroundColor: '#007AFF' }}>
-            <Text style={{ alignSelf: 'center', fontSize: 18, color: '#FFFFFF', fontWeight: '100', letterSpacing: 2 }}>
-              {moment(new Date()).format("MMMM D, YYYY")}
-            </Text>
-            <Text style={{  alignSelf: 'center', fontSize: 36, color: '#FFFFFF', fontWeight: 'bold', letterSpacing: 0.5, lineHeight: 40 }}>
-              {moment(new Date()).format("dddd")}
-            </Text>
-            <Button
-              icon=  {{name: 'refresh', type:'font-awesome',color: "#FFFFFF"}}
-              onPress={this.refresh.bind(this)}
-              containerStyle={{position: 'absolute', right: 0, top: 10, bottom: 0}}
-              type="clear"
-            />
-          </Card>
+      <ScrollView
+      refreshControl={
+        <RefreshControl
+          refreshing={this.props.loading}
+          onRefresh={this.refresh.bind(this)}
+        />
+      }
+      style={{ flex: 1 }}
+      >
 
-          <Card containerStyle={{ height: 400, flexDirection: 'column', borderWidth: 1, alignSelf: 'center', borderRadius: 30, padding: 20, width: '90%', shadowOpacity: 0.6, shadowRadius: 2, elevation: 10 }}>
-            <View style={{height: '100%'}}>
-              {this.renderStatus()}
+      <LinearGradient start={{x: 0, y: 1}} end={{x: 0, y: 0}} colors={['#7dbcff', '#0000ff']} style={styles.linearContainer} >
+      </LinearGradient>
+
+      <View style={{ alignItems: 'center', paddingBottom: 10}}>
+
+        <Card containerStyle={styles.dateContainer}>
+          <Text style={styles.smallDateFont}>
+            {moment(new Date()).format("MMMM D, YYYY")}
+          </Text>
+          <Text style={styles.bigDateFont}>
+            {moment(new Date()).format("dddd")}
+          </Text>
+        </Card>
+
+        <Card containerStyle={styles.userContainer}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Text style={[styles.smallFont, {fontFamily: 'Helvetica Neu Bold'}]}>
+              Profilettt
+            </Text>
+            <Text style={[styles.smallFont, {fontFamily: 'Helvetica Neu Bold'}]}>
+              <Text style ={{ fontSize: 8 }}>ID</Text> {this.props.studID}
+            </Text>
+          </View>
+          <Divider style={{marginTop: 5, marginBottom: 5 }}/>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-start'}}>
+            <View style={styles.centerContainer}>
+              <Image source = {require('../images/user.png')} style={styles.userImage} />
             </View>
+            <View>
+            <Text style={styles.nameFont}>
+              {this.props.name}
+            </Text>
+            <Text style={styles.smallFont}>
+              {this.props.course}
+            </Text>
+            </View>
+          </View>
+        </Card>
+
+        <Card containerStyle={styles.classContainer}>
+            {this.renderAttendanceStatus()}
         </Card>
 
         <Modal
-          isVisible={this.props.isModalVisible}
+          isVisible={this.props.isAttendanceModalVisible}
           backdropOpacity={0.5}
           animationIn="zoomInDown"
           animationOut="zoomOutUp"
@@ -147,14 +248,13 @@ class HomeScreen extends Component {
           backdropTransitionInTiming={600}
           backdropTransitionOutTiming={600}
         >
-            <View style={{ alignItems:'center', padding: 80, backgroundColor: '#FFFFFF', borderRadius: 50}} >
-              <ActivityIndicator size="small" color="#007AFF" style={{ padding: 10 }} />
-              <Text alignSelf='center'>{this.renderAttendance()}</Text>
-              <Text>{this.props.time}</Text>
-            </View>
+          <View style={styles.attModalContainer} >
+              {this.toggleAttendanceModal()}
+          </View>
         </Modal>
+
         <Modal
-          isVisible={this.state.modalVisible}
+          isVisible={this.props.isBluetoothModalVisible}
           backdropOpacity={0.5}
           animationIn="zoomInDown"
           animationOut="zoomOutUp"
@@ -163,61 +263,145 @@ class HomeScreen extends Component {
           backdropTransitionInTiming={600}
           backdropTransitionOutTiming={600}
         >
-            <View style={{ alignItems:'center', padding: 80, backgroundColor: '#FFFFFF', borderRadius: 50}} >
-                  <Text alignSelf='center'>Please turn on bluetooth</Text>
+            <View style={styles.bluetoothContainer} >
+                  <Image source = {require('../images/bluetoothError.png')} style={styles.bluetoothImage} />
+                  <Text alignSelf='center' style={{ marginBottom: 30 }}>Please turn on your Bluetooth.</Text>
                   <Button
-                    onPress={() => {this.setModalVisible(false)}}
+                    onPress={this.dismissBluetoothModal.bind(this)}
                     containerStyle={{alignSelf: 'center'}}
-                    buttonStyle={{ backgroundColor:'#007AFF', height: 50, width: 180, borderRadius: 20, marginLeft: 0, marginRight: 0 }}
+                    buttonStyle={styles.tryAgainButton}
                     title='Try Again'
                   />
             </View>
         </Modal>
+
       </View>
+      </ScrollView>
     );
   }
 
 }
 
+const styles = StyleSheet.create({
+  dateContainer: {
+    ...Container.dateContainer
+  },
+  classContainer: {
+    ...Container.classContainer
+  },
+  innerClassContainer: {
+    ...Container.innerClassContainer
+  },
+  bluetoothContainer:{
+    ...Container.bluetoothContainer
+  },
+  userContainer: {
+    ...Container.userContainer
+  },
+  imageContainer: {
+    ...Container.imageContainer
+  },
+  classInfoContainer: {
+    ...Container.classInfoContainer
+  },
+  calendarErrorContainer:{
+    ...Container.calendarErrorContainer
+  },
+  linearContainer: {
+    ...Container.linearContainer
+  },
+  attModalContainer: {
+    ...Container.attModalContainer
+  },
+  centerContainer: {
+    ...Container.centerContainer
+  },
+  classImage:{
+    ...Picture.classImage
+  },
+  userImage: {
+    ...Picture.userImage
+  },
+  startingImage: {
+    ...Picture.startingImage
+  },
+  calendarErrorImage: {
+    ...Picture.calendarErrorImage
+  },
+  bluetoothImage: {
+    ...Picture.bluetoothImage
+  },
+  classIndicator: {
+    ...Indicator.classIndicator
+  },
+  smallFont: {
+    ...Font.smallFont
+  },
+  bigFont: {
+    ...Font.bigFont
+  },
+  noClassFont: {
+    ...Font.noClassFont
+  },
+  smallDateFont: {
+    ...Font.smallDateFont
+  },
+  bigDateFont: {
+    ...Font.bigDateFont
+  },
+  nameFont: {
+    ...Font.nameFont
+  },
+  attButton:{
+    ...ButtonStyle.attButton
+  },
+  tryAgainButton: {
+    ...ButtonStyle.tryAgainButton
+  }
+});
+
 const mapStateToProps = ({ att }) => {
   const {
     name,
     studID,
+    course,
     className,
     startTime,
-    endTime,
     status,
+    endTime,
     loading,
-    disable,
     room,
     time,
     inClass,
-    attStatus,
-    isModalVisible,
     attendanceTaken,
     checking,
-    location
+    location,
+    attendance,
+    courseCode,
+    isAttendanceModalVisible,
+    isBluetoothModalVisible
   } = att;
 
   return {
     name,
     studID,
+    course,
+    status,
     className,
     startTime,
     endTime,
-    status,
     loading,
-    disable,
     room,
     time,
     inClass,
-    attStatus,
-    isModalVisible,
     attendanceTaken,
     checking,
-    location
+    location,
+    attendance,
+    courseCode,
+    isAttendanceModalVisible,
+    isBluetoothModalVisible
   };
 }
 
-
-export default connect(mapStateToProps, { checkCurrentLocation, getUserInfo, getNextClass, startProximityObserver, toggleModal, dismissModal, stopProximityObserver })(HomeScreen);
+export default connect(mapStateToProps, { getUserInfo, getNextClass, getAttTime, dismissAttendanceModal, dismissBluetoothModal, toggleBluetoothModal })(HomeScreen);
