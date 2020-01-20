@@ -1,2 +1,0 @@
-## Contactless Attendance Management System
-
