@@ -10,7 +10,7 @@
   "dependencies": {
     "@estimote/react-native-proximity": "^0.6.0",
     "firebase": "^6.3.5",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "react": "16.8.6",
     "react-native": "0.60.4",
     "react-native-background-timer": "^2.1.1",
